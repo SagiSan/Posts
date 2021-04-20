@@ -1,0 +1,1 @@
+export { withWelcomeMessage } from "./withWelcomeMessage";

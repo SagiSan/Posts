@@ -1,0 +1,9 @@
+.search {
+  border: none;
+  padding: 1em 1rem;
+  background-color: #121212;
+  color: #fff;
+}
+.search:focus {
+  outline: none;
+}

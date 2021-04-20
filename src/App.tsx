@@ -1,26 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import * as React from "react";
+import "./App.css";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Posts as CleanPosts } from "./pages";
+import { Post as CleanPost } from "./pages";
+import { useStore } from "./store";
+import { getComments, getPosts, getUserName } from "./api";
+import { IPost } from "./types";
+import { withWelcomeMessage } from "./HOC";
+
+const Posts = withWelcomeMessage(CleanPosts);
+const Post = withWelcomeMessage(CleanPost);
 
 function App() {
+  const {
+    state: { posts, users },
+    dispatch,
+  } = useStore();
+  React.useEffect(() => {
+    getPosts(dispatch);
+  }, []);
+
+  React.useEffect(() => {
+    let userIds: { [index: number]: number } = {};
+    posts.forEach((post: IPost) => {
+      userIds[post.userId] = post.userId;
+      getComments(post.id, dispatch);
+    });
+    getUserNames(Object.values(userIds));
+  }, [posts]);
+
+  const getUserNames = async (userIds: number[]) => {
+    for (let id of userIds) {
+      if (!users[id]) {
+        getUserName(id, dispatch);
+      }
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <Switch>
+          <Route exact path="/posts">
+            <Posts />
+          </Route>
+          <Route exact path="/posts/:id">
+            <Post />
+          </Route>
+          <Route path="*">
+            <Posts />
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 }
 
-export default App;
+export { App };
